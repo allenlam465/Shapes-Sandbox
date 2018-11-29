@@ -123,16 +123,26 @@ public class Driver extends Application{
 		
 		GridPane gp = new GridPane();
 		
-		if(shapes.getValue().equals("Sphere")) {
+		gp.addColumn(0, shapeLabel, xLabel, yLabel, radiusLabel, heightLabel, widthLabel, lengthLabel);
+		gp.addColumn(1, shapes, xInput, yInput, radiusInput, heightInput, widthInput, lengthInput);
+		
+		if(shapes.getValue().equals("Sphere")) { 
+			
+			if(gp.getChildren().contains(heightInput) || gp.getChildren().contains(widthInput) || gp.getChildren().contains(lengthInput)) {
+				
+			}
 			
 			int radius = Integer.parseInt(radiusInput.getText());
 			
 			Sphere sphere = new Sphere(radius);
 			
 			shapesGroup.getChildren().add(sphere);
-			
 		}
 		else if(shapes.getValue().equals("Cylinder")) {
+			
+			if(gp.getChildren().contains(widthInput) || gp.getChildren().contains(lengthInput)) {
+				
+			}
 			
 			int radius = Integer.parseInt(radiusInput.getText());
 			int height = Integer.parseInt(heightInput.getText());
@@ -140,10 +150,13 @@ public class Driver extends Application{
 			Cylinder cylinder = new Cylinder(radius, height);
 			
 			shapesGroup.getChildren().add(cylinder);
-
-			
 		}
 		else if(shapes.getValue().equals("Box")) {
+			
+			if(gp.getChildren().contains(heightInput) || gp.getChildren().contains(widthInput) || gp.getChildren().contains(lengthInput)) {
+				
+			}
+			
 			int width = Integer.parseInt(heightInput.getText());
 			int height = Integer.parseInt(heightInput.getText());
 			int depth = Integer.parseInt(heightInput.getText());
@@ -151,10 +164,8 @@ public class Driver extends Application{
 			Box box = new Box(width,height,depth);
 			
 			shapesGroup.getChildren().add(box);
-
 			
 		}
-
 	}
 	
 	protected void customizationMenu() {
