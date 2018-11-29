@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class CSV {
 	
-	private static final String HEADER = "Shape, ";
+	private static final String HEADER = "Shape, X, Y, Radius, Width, Height, Depth";
 
 	private String outputFile;
 	

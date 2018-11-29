@@ -15,9 +15,11 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Box;
@@ -25,6 +27,7 @@ import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Shape3D;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
@@ -47,13 +50,12 @@ To be submitted: All source code files, as well as a brief report (~2 paragraphs
 public class Driver extends Application{
 
 	public static void main(String[] args) {
-
 		launch(args);
-
 	}
 
 	private BorderPane border;
 	private Group shapesGroup;
+	private Shape3D selectedShape;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -61,6 +63,7 @@ public class Driver extends Application{
 		border = new BorderPane();
 
 		menu();
+		customizationMenu();
 
 		VBox rootNode = new VBox(10);
 		rootNode.setAlignment(Pos.CENTER);
@@ -73,41 +76,44 @@ public class Driver extends Application{
 		bottomNode.setPadding(new Insets(10));
 
 		shapesGroup = new Group();
-		SubScene shapesSub = new SubScene(shapesGroup, 350, 350,
+		SubScene shapesSub = new SubScene(shapesGroup, 500, 500,
 				true, SceneAntialiasing. DISABLED);
 
+		VBox.setVgrow(shapesSub, Priority.ALWAYS);
 		shapesSub.setFill(Color. AZURE);
 		rootNode.getChildren().add(shapesSub);
 
-		border.setLeft(rootNode);
+		border.setCenter(rootNode);
 		border.setBottom(bottomNode);
 
 		addShape.setOnAction(event ->{
 			addShape();
 		});
 
-		Scene myScene = new Scene(border, 600, 600);
+		Scene myScene = new Scene(border,800,700);
 
 		primaryStage.setScene(myScene);
 		primaryStage.show();
 	}
 
-	protected void menu() {
+	private void menu() {
 		MenuBar menu = new MenuBar();
 		Menu file = new Menu("File");
+		Menu edit = new Menu("Edit");
 
 		MenuItem open = new MenuItem("Open");
 		MenuItem save = new MenuItem("Save");
+		MenuItem backgroundColor = new MenuItem("Background Color");
 
 		file.getItems().addAll(open, new SeparatorMenuItem(), save);
+		edit.getItems().add(backgroundColor);
 
-		menu.getMenus().add(file);
+		menu.getMenus().addAll(file,edit);
 
 		border.setTop(menu);
 	}
 
-	protected void addShape() {
-
+	private void addShape() {
 		Label shapeLabel = new Label("Shape");
 		Label xLabel = new Label("X");
 		Label yLabel = new Label("Y");
@@ -173,9 +179,7 @@ public class Driver extends Application{
 					int y = Integer.parseInt(yInput.getText());
 					int radius = Integer.parseInt(radiusInput.getText());
 
-					Sphere sphere = new Sphere(radius);
-					sphere.getTransforms().add(new Translate(x, y, 0));
-					addShape(sphere);
+					addSphere(x,y,radius);
 				});
 			}
 			else if(chosenShape.equals("Cylinder")) {
@@ -189,9 +193,7 @@ public class Driver extends Application{
 					int radius = Integer.parseInt(radiusInput.getText());
 					int height = Integer.parseInt(heightInput.getText());
 
-					Cylinder cylinder = new Cylinder(radius, height);
-					cylinder.getTransforms().add(new Translate(x, y, 0));
-					addShape(cylinder);
+					addCylinder(x,y,radius,height);
 				});
 			}
 			else if(chosenShape.equals("Box")) {
@@ -202,25 +204,58 @@ public class Driver extends Application{
 				addShape.setOnAction(event ->{
 					int x = Integer.parseInt(xInput.getText());
 					int y = Integer.parseInt(yInput.getText());
-					int width = Integer.parseInt(heightInput.getText());
+					int width = Integer.parseInt(widthInput.getText());
 					int height = Integer.parseInt(heightInput.getText());
-					int depth = Integer.parseInt(heightInput.getText());
+					int depth = Integer.parseInt(lengthInput.getText());
 
-					Box box = new Box(width,height,depth);
-					box.getTransforms().add(new Translate(x, y, 0));
-					addShape(box);
+					addBox(x,y,width,height,depth);
 				});
 
 			}
 
 		});
 	}
+	
+	private void addSphere(int x, int y, int radius) {
+		Sphere sphere = new Sphere(radius);
+		sphere.getTransforms().add(new Translate(x, y, 0));
 
-	protected void addShape(Shape3D shape) {
-		shapesGroup.getChildren().add(shape);
+		sphere.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
+			selectedShape = sphere;
+		});
+		
+		shapesGroup.getChildren().add(sphere);
+	}
+	
+	private void addCylinder(int x, int y, int radius, int height) {
+		Cylinder cylinder = new Cylinder(radius, height);
+		cylinder.getTransforms().add(new Translate(x, y, 0));
+
+		cylinder.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
+			selectedShape = cylinder;
+		});
+		
+		shapesGroup.getChildren().add(cylinder);
+	}
+	
+	private void addBox(int x, int y, int width, int height, int depth) {
+		Box box = new Box(width,height,depth);
+		box.getTransforms().add(new Translate(x, y, 0));
+
+		box.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
+			selectedShape = box;
+		});
+		
+		shapesGroup.getChildren().add(box);
 	}
 
-	protected void customizationMenu() {
+	private void customizationMenu() {
+		Label shapeSelected = new Label("");
+		Label hRotateLabel = new Label("Horizontal Rotate");
+		Label vRotateLabel = new Label("Vertical Rotate");
+		Label xLabel = new Label("X Posistion");
+		Label yLabel = new Label("Y Position");
+		Label scaleLabel = new Label("Scale");
 		
 		Slider xAxis = new Slider(0.0, 360.0, 0.0);
 		xAxis.setShowTickMarks(true);
@@ -228,16 +263,39 @@ public class Driver extends Application{
 		Slider yAxis = new Slider(0.0, 360.0, 0.0);
 		yAxis.setShowTickMarks(true);
 		yAxis.setShowTickLabels(true);
-		
+		Slider xPos = new Slider(0.0, 500.0, 0);
+		xPos.setShowTickMarks(true);
+		xPos.setShowTickLabels(true);
+		Slider yPos = new Slider(0.0, 500.0, 0);
+		yPos.setShowTickMarks(true);
+		yPos.setShowTickLabels(true);
+		Slider scale = new Slider(0.0, 5.0, 0);
+		scale.setShowTickMarks(true);
+		scale.setShowTickLabels(true);
+
 		Rotate horizontalRotate = new Rotate(0, Rotate.X_AXIS);
 		Rotate verticalRotate = new Rotate(0, Rotate.Y_AXIS);
-
-		VBox customizationMenu = new VBox(10, xAxis, yAxis);
+		Scale scaleShape = new Scale();
+		Translate translateShape = new Translate();
 		
+		GridPane gp = new GridPane();
 		
+		gp.addColumn(0, hRotateLabel, vRotateLabel, xLabel, yLabel, scaleLabel);
+		gp.addColumn(1, xAxis, yAxis, xPos, yPos, scale);
+		gp.setHgap(10);
+		gp.setVgap(10);
+		
+		shapeSelected.textProperty().addListener((observer, oldValue, newValue) ->{
+			if(selectedShape.getClass().isInstance(new Sphere())) {
+				shapeSelected.setText("Sphere");
+			}
+		});
+		
+		VBox customizationMenu = new VBox(10,shapeSelected,gp);
+		customizationMenu.setPadding(new Insets(10));
+		customizationMenu.setAlignment(Pos.CENTER);
+		
+		border.setRight(customizationMenu);
 
 	}
-
-
-
 }
