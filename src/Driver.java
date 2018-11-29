@@ -13,6 +13,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -23,6 +24,7 @@ import javafx.scene.shape.Box;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Shape3D;
 import javafx.scene.shape.Sphere;
+import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
@@ -52,7 +54,6 @@ public class Driver extends Application{
 
 	private BorderPane border;
 	private Group shapesGroup;
-	private Stage primaryStage;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -220,6 +221,20 @@ public class Driver extends Application{
 	}
 
 	protected void customizationMenu() {
+		
+		Slider xAxis = new Slider(0.0, 360.0, 0.0);
+		xAxis.setShowTickMarks(true);
+		xAxis.setShowTickLabels(true);
+		Slider yAxis = new Slider(0.0, 360.0, 0.0);
+		yAxis.setShowTickMarks(true);
+		yAxis.setShowTickLabels(true);
+		
+		Rotate horizontalRotate = new Rotate(0, Rotate.X_AXIS);
+		Rotate verticalRotate = new Rotate(0, Rotate.Y_AXIS);
+
+		VBox customizationMenu = new VBox(10, xAxis, yAxis);
+		
+		
 
 	}
 
