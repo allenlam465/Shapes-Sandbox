@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -20,7 +21,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Cylinder;
+import javafx.scene.shape.Shape3D;
 import javafx.scene.shape.Sphere;
+import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
 /*
@@ -49,6 +52,7 @@ public class Driver extends Application{
 
 	private BorderPane border;
 	private Group shapesGroup;
+	private Stage primaryStage;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -57,7 +61,6 @@ public class Driver extends Application{
 
 		menu();
 
-		// Application’s root node will be a vbox
 		VBox rootNode = new VBox(10);
 		rootNode.setAlignment(Pos.CENTER);
 
@@ -68,19 +71,21 @@ public class Driver extends Application{
 		bottomNode.setAlignment(Pos.CENTER);
 		bottomNode.setPadding(new Insets(10));
 
-		// shapesGroup will eventually hold some 3D shapes
 		shapesGroup = new Group();
-		SubScene shapesSub = new SubScene(shapesGroup, 340, 340,
+		SubScene shapesSub = new SubScene(shapesGroup, 350, 350,
 				true, SceneAntialiasing. DISABLED);
 
-		// Change the SubScene’s background color
 		shapesSub.setFill(Color. AZURE);
 		rootNode.getChildren().add(shapesSub);
 
-		border.setCenter(rootNode);
+		border.setLeft(rootNode);
 		border.setBottom(bottomNode);
+		
+		addShape.setOnAction(event ->{
+			addShape();
+		});
 
-		Scene myScene = new Scene(border, 380, 440);
+		Scene myScene = new Scene(border, 600, 600);
 
 		primaryStage.setScene(myScene);
 		primaryStage.show();
@@ -117,44 +122,101 @@ public class Driver extends Application{
 		TextField heightInput = new TextField();
 		TextField widthInput = new TextField();
 		TextField lengthInput = new TextField();
-
-		ChoiceBox<String> shapes = new ChoiceBox<>();
-		shapes.getItems().addAll("Sphere","Cylinder","Box");
 		
-		GridPane gp = new GridPane();
+		Button addShape = new Button("Add Shape");
+
+		String[] shapes = {"Sphere","Cylinder","Box"};
+		ChoiceBox<String> shapesList = new ChoiceBox<>(FXCollections.observableArrayList(shapes));
 		
-		if(shapes.getValue().equals("Sphere")) {
+		GridPane gp = new GridPane();		
+		gp.addColumn(0, shapeLabel, xLabel, yLabel);
+		gp.addColumn(1, shapesList, xInput, yInput);
+		
+		VBox shapeMenu = new VBox(10, gp, addShape);
+		
+		gp.setHgap(10);
+		gp.setVgap(10);
+		gp.setAlignment(Pos.CENTER);
+		shapeMenu.setPadding(new Insets(10));
+		shapeMenu.setAlignment(Pos.CENTER);
+		border.setBottom(shapeMenu);
+		
+		shapesList.getSelectionModel().selectedIndexProperty().addListener((obs, oldValue, newValue) ->{
 			
-			int radius = Integer.parseInt(radiusInput.getText());
+			String chosenShape = shapes[newValue.intValue()];
 			
-			Sphere sphere = new Sphere(radius);
+			if(gp.getChildren().contains(heightLabel)) {
+				gp.getChildren().remove(heightLabel);
+				gp.getChildren().remove(heightInput);
+			}
+			if(gp.getChildren().contains(widthLabel)) {
+				gp.getChildren().remove(widthLabel);
+				gp.getChildren().remove(widthInput);
+			}				
+			if(gp.getChildren().contains(lengthLabel)) {
+				gp.getChildren().remove(lengthLabel);
+				gp.getChildren().remove(lengthInput);
+			}
+			if(gp.getChildren().contains(radiusLabel)) {
+				gp.getChildren().remove(radiusLabel);
+				gp.getChildren().remove(radiusInput);
+			}
 			
-			shapesGroup.getChildren().add(sphere);
-			
-		}
-		else if(shapes.getValue().equals("Cylinder")) {
-			
-			int radius = Integer.parseInt(radiusInput.getText());
-			int height = Integer.parseInt(heightInput.getText());
+			if(chosenShape.equals("Sphere")) {
 
-			Cylinder cylinder = new Cylinder(radius, height);
-			
-			shapesGroup.getChildren().add(cylinder);
+				gp.addColumn(2, radiusLabel);
+				gp.addColumn(3, radiusInput);
+				
+				addShape.setOnAction(event ->{
+					int x = Integer.parseInt(xInput.getText());
+					int y = Integer.parseInt(yInput.getText());
+					int radius = Integer.parseInt(radiusInput.getText());
+					
+					Sphere sphere = new Sphere(radius);
+					sphere.getTransforms().add(new Translate(x, y, 0));
+					addShape(sphere);		
+				});
+			}
+			else if(chosenShape.equals("Cylinder")) {
+				
+				gp.addColumn(2, radiusLabel, heightLabel);
+				gp.addColumn(3, radiusInput, heightInput);
+				
+				addShape.setOnAction(event ->{
+					int x = Integer.parseInt(xInput.getText());
+					int y = Integer.parseInt(yInput.getText());
+					int radius = Integer.parseInt(radiusInput.getText());
+					int height = Integer.parseInt(heightInput.getText());
+					
+					Cylinder cylinder = new Cylinder(radius, height);
+					cylinder.getTransforms().add(new Translate(x, y, 0));
+					addShape(cylinder);
+				});
+			}
+			else if(chosenShape.equals("Box")) {
+				
+				gp.addColumn(2, widthLabel, heightLabel, lengthLabel);
+				gp.addColumn(3, widthInput, heightInput, lengthInput);
+				
+				addShape.setOnAction(event ->{
+					int x = Integer.parseInt(xInput.getText());
+					int y = Integer.parseInt(yInput.getText());
+					int width = Integer.parseInt(heightInput.getText());
+					int height = Integer.parseInt(heightInput.getText());
+					int depth = Integer.parseInt(heightInput.getText());
+					
+					Box box = new Box(width,height,depth);
+					box.getTransforms().add(new Translate(x, y, 0));
+					addShape(box);
+				});
 
+			}
 			
-		}
-		else if(shapes.getValue().equals("Box")) {
-			int width = Integer.parseInt(heightInput.getText());
-			int height = Integer.parseInt(heightInput.getText());
-			int depth = Integer.parseInt(heightInput.getText());
-			
-			Box box = new Box(width,height,depth);
-			
-			shapesGroup.getChildren().add(box);
-
-			
-		}
-
+		});
+	}
+	
+	protected void addShape(Shape3D shape) {
+		shapesGroup.getChildren().add(shape);
 	}
 	
 	protected void customizationMenu() {
