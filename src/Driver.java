@@ -45,6 +45,8 @@ On the right of the Screen should be a set of tools (sliders, textforms, dropdow
 A menu system should be implemented allowing the user to save their current image. Determine a way to save the shapes in the subscene, as well as their locations and dimensions. The user can also open a valid file and the subscene should populate with the shapes specified by that file.
 
 To be submitted: All source code files, as well as a brief report (~2 paragraphs) from each student discussing what challenges they encountered and how they were solved, as well as which part of the project they worked on.
+BOUNDED WITHIN SUBSPACE 
+NO NEGATIVE VALUE
  */
 
 public class Driver extends Application{
@@ -86,9 +88,7 @@ public class Driver extends Application{
 		border.setCenter(rootNode);
 		border.setBottom(bottomNode);
 
-		addShape.setOnAction(event ->{
-			addShape();
-		});
+		addShape();
 
 		Scene myScene = new Scene(border,800,700);
 
@@ -215,7 +215,7 @@ public class Driver extends Application{
 
 		});
 	}
-	
+
 	private void addSphere(int x, int y, int radius) {
 		Sphere sphere = new Sphere(radius);
 		sphere.getTransforms().add(new Translate(x, y, 0));
@@ -223,10 +223,10 @@ public class Driver extends Application{
 		sphere.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
 			selectedShape = sphere;
 		});
-		
+
 		shapesGroup.getChildren().add(sphere);
 	}
-	
+
 	private void addCylinder(int x, int y, int radius, int height) {
 		Cylinder cylinder = new Cylinder(radius, height);
 		cylinder.getTransforms().add(new Translate(x, y, 0));
@@ -234,10 +234,10 @@ public class Driver extends Application{
 		cylinder.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
 			selectedShape = cylinder;
 		});
-		
+
 		shapesGroup.getChildren().add(cylinder);
 	}
-	
+
 	private void addBox(int x, int y, int width, int height, int depth) {
 		Box box = new Box(width,height,depth);
 		box.getTransforms().add(new Translate(x, y, 0));
@@ -245,7 +245,7 @@ public class Driver extends Application{
 		box.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
 			selectedShape = box;
 		});
-		
+
 		shapesGroup.getChildren().add(box);
 	}
 
@@ -256,46 +256,119 @@ public class Driver extends Application{
 		Label xLabel = new Label("X Posistion");
 		Label yLabel = new Label("Y Position");
 		Label scaleLabel = new Label("Scale");
-		
-		Slider xAxis = new Slider(0.0, 360.0, 0.0);
+
+		//Horizontal and Vertical Slider
+		Slider xAxis = new Slider(-360.0, 360.0, 0.0);
 		xAxis.setShowTickMarks(true);
 		xAxis.setShowTickLabels(true);
-		Slider yAxis = new Slider(0.0, 360.0, 0.0);
+		Slider yAxis = new Slider(-360.0, 360.0, 0.0);
 		yAxis.setShowTickMarks(true);
 		yAxis.setShowTickLabels(true);
-		Slider xPos = new Slider(0.0, 500.0, 0);
+
+		//X and Y position slider
+		Slider xPos = new Slider(-500.0, 500.0, 0);
 		xPos.setShowTickMarks(true);
 		xPos.setShowTickLabels(true);
-		Slider yPos = new Slider(0.0, 500.0, 0);
+		Slider yPos = new Slider(-500.0, 500.0, 0);
 		yPos.setShowTickMarks(true);
 		yPos.setShowTickLabels(true);
-		Slider scale = new Slider(0.0, 5.0, 0);
+
+		//Scale slider
+		Slider scale = new Slider(-5.0, 5.0, 0);
 		scale.setShowTickMarks(true);
 		scale.setShowTickLabels(true);
 
-		Rotate horizontalRotate = new Rotate(0, Rotate.X_AXIS);
-		Rotate verticalRotate = new Rotate(0, Rotate.Y_AXIS);
-		Scale scaleShape = new Scale();
-		Translate translateShape = new Translate();
-		
 		GridPane gp = new GridPane();
-		
+
+
 		gp.addColumn(0, hRotateLabel, vRotateLabel, xLabel, yLabel, scaleLabel);
 		gp.addColumn(1, xAxis, yAxis, xPos, yPos, scale);
 		gp.setHgap(10);
 		gp.setVgap(10);
 		
-		shapeSelected.textProperty().addListener((observer, oldValue, newValue) ->{
-			if(selectedShape.getClass().isInstance(new Sphere())) {
-				shapeSelected.setText("Sphere");
+		xAxis.setValue(0);
+		yAxis.setValue(0);
+		xPos.setValue(0);
+		yPos.setValue(0);
+		scale.setValue(0);
+
+		xAxis.valueProperty().addListener((o, oldVal, newVal) ->
+		{        	
+			if(selectedShape != null)
+			{
+				Rotate xRotate = new Rotate(0, Rotate.X_AXIS);
+
+				xRotate.setAngle((double)newVal);
+				selectedShape.getTransforms().add(xRotate);
 			}
 		});
+
+		yAxis.valueProperty().addListener((o, oldVal, newVal) ->
+		{        	
+			if(selectedShape != null)
+			{
+				Rotate yRotate = new Rotate(0, Rotate.Y_AXIS);
+
+				yRotate.setAngle((double)newVal);
+				selectedShape.getTransforms().add(yRotate);
+			}
+		});
+
+		xPos.valueProperty().addListener((o, oldVal, newVal) ->
+		{
+			if(selectedShape != null)
+			{
+				//Translate translateShape = new Translate();
+				selectedShape.setLayoutX((double)newVal);
+				//translateShape.setX((double)newVal);
+				//selectedShape.getTransforms().add(translateShape);
+			}
+
+		});
 		
+		yPos.valueProperty().addListener((o, oldVal, newVal) ->
+		{
+			if(selectedShape != null)
+			{
+				//Translate translateShape = new Translate();
+				selectedShape.setLayoutY((double)newVal);
+
+				//translateShape.setY((double)newVal);
+				//selectedShape.getTransforms().add(translateShape);
+			}
+
+		});
+
+		scale.valueProperty().addListener((o, oldVal, newVal) ->{
+			if(selectedShape != null)
+			{
+				Scale scaleShape = new Scale();
+				
+				scaleShape.setX((double)newVal);
+				scaleShape.setY((double)newVal);
+				scaleShape.setZ((double)newVal);
+
+				selectedShape.getTransforms().addAll(scaleShape);
+			}
+		});
+
+		shapeSelected.textProperty().addListener((observer, oldValue, newValue) ->{
+			shapeSelected.setText("Selected Shape");
+		});
+
 		VBox customizationMenu = new VBox(10,shapeSelected,gp);
 		customizationMenu.setPadding(new Insets(10));
 		customizationMenu.setAlignment(Pos.CENTER);
-		
+
 		border.setRight(customizationMenu);
+
+	}
+
+	private void writeFile(String fileName) {
+
+	}
+
+	private void openFile(String fileName) {
 
 	}
 }
