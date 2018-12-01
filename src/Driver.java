@@ -1,5 +1,6 @@
 import javafx.application.Application;
 import javafx.collections.FXCollections;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -223,6 +224,8 @@ public class Driver extends Application{
 		sphere.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
 			selectedShape = sphere;
 		});
+		
+		sphere.boundsInParentProperty();
 
 		shapesGroup.getChildren().add(sphere);
 	}
@@ -234,6 +237,8 @@ public class Driver extends Application{
 		cylinder.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
 			selectedShape = cylinder;
 		});
+		
+		cylinder.boundsInParentProperty();
 
 		shapesGroup.getChildren().add(cylinder);
 	}
@@ -246,6 +251,8 @@ public class Driver extends Application{
 			selectedShape = box;
 		});
 
+		box.boundsInParentProperty();
+		
 		shapesGroup.getChildren().add(box);
 	}
 
@@ -274,7 +281,7 @@ public class Driver extends Application{
 		yPos.setShowTickLabels(true);
 
 		//Scale slider
-		Slider scale = new Slider(-5.0, 5.0, 0);
+		Slider scale = new Slider(1.0, 5.0, 0);
 		scale.setShowTickMarks(true);
 		scale.setShowTickLabels(true);
 
@@ -318,10 +325,7 @@ public class Driver extends Application{
 		{
 			if(selectedShape != null)
 			{
-				//Translate translateShape = new Translate();
 				selectedShape.setLayoutX((double)newVal);
-				//translateShape.setX((double)newVal);
-				//selectedShape.getTransforms().add(translateShape);
 			}
 
 		});
@@ -330,30 +334,26 @@ public class Driver extends Application{
 		{
 			if(selectedShape != null)
 			{
-				//Translate translateShape = new Translate();
 				selectedShape.setLayoutY((double)newVal);
-
-				//translateShape.setY((double)newVal);
-				//selectedShape.getTransforms().add(translateShape);
 			}
 
 		});
 
 		scale.valueProperty().addListener((o, oldVal, newVal) ->{
 			if(selectedShape != null)
-			{
-				Scale scaleShape = new Scale();
-				
-				scaleShape.setX((double)newVal);
-				scaleShape.setY((double)newVal);
-				scaleShape.setZ((double)newVal);
-
-				selectedShape.getTransforms().addAll(scaleShape);
+			{	
+				selectedShape.setScaleX((double)newVal);
+				selectedShape.setScaleY((double)newVal);
+				selectedShape.setScaleZ((double)newVal);
 			}
 		});
-
+		
 		shapeSelected.textProperty().addListener((observer, oldValue, newValue) ->{
-			shapeSelected.setText("Selected Shape");
+			
+			if(selectedShape != null) {
+				
+				shapeSelected.setText("Selected Shape");
+			}
 		});
 
 		VBox customizationMenu = new VBox(10,shapeSelected,gp);
