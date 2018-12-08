@@ -1,9 +1,18 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
@@ -30,6 +39,7 @@ import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /*
@@ -59,6 +69,15 @@ public class Driver extends Application{
 	private BorderPane border;
 	private Group shapesGroup;
 	private Shape3D selectedShape;
+	private SubScene shapesSub;
+	private Label messageLabel = new Label("");
+	private Label shapeSelected = new Label("");
+	private Slider xAxis = new Slider(-360.0, 360.0, 0.0);
+	private Slider yAxis = new Slider(-360.0, 360.0, 0.0);
+	private Slider xPos = new Slider(-500.0, 500.0, 0.0);
+	private Slider yPos = new Slider(-500.0, 500.0, 0.0);
+	private Slider scale = new Slider(1.0, 5.0, 0);
+	private Stage primaryStage;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -79,7 +98,7 @@ public class Driver extends Application{
 		bottomNode.setPadding(new Insets(10));
 
 		shapesGroup = new Group();
-		SubScene shapesSub = new SubScene(shapesGroup, 500, 500,
+		shapesSub = new SubScene(shapesGroup, 500, 500,
 				true, SceneAntialiasing. DISABLED);
 
 		VBox.setVgrow(shapesSub, Priority.ALWAYS);
@@ -91,7 +110,7 @@ public class Driver extends Application{
 
 		addShape();
 
-		Scene myScene = new Scene(border,800,700);
+		Scene myScene = new Scene(border,800,750);
 
 		primaryStage.setScene(myScene);
 		primaryStage.show();
@@ -112,6 +131,29 @@ public class Driver extends Application{
 		menu.getMenus().addAll(file,edit);
 
 		border.setTop(menu);
+
+		save.setOnAction(event ->{
+			FileChooser fc = new FileChooser();
+			File saveFile = fc.showSaveDialog(primaryStage);
+
+			try {
+				writeFile(saveFile.getName());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+
+		open.setOnAction(event ->{
+			FileChooser fc = new FileChooser();
+			File openFile = fc.showOpenDialog(primaryStage);
+
+			try {
+				getFileContent(openFile.getName());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
 	}
 
 	private void addShape() {
@@ -140,7 +182,7 @@ public class Driver extends Application{
 		gp.addColumn(0, shapeLabel, xLabel, yLabel);
 		gp.addColumn(1, shapesList, xInput, yInput);
 
-		VBox shapeMenu = new VBox(10, gp, addShape);
+		VBox shapeMenu = new VBox(10, messageLabel, gp, addShape);
 
 		gp.setHgap(10);
 		gp.setVgap(10);
@@ -176,11 +218,18 @@ public class Driver extends Application{
 				gp.addColumn(3, radiusInput);
 
 				addShape.setOnAction(event ->{
-					int x = Integer.parseInt(xInput.getText());
-					int y = Integer.parseInt(yInput.getText());
-					int radius = Integer.parseInt(radiusInput.getText());
+					double x = Double.parseDouble(xInput.getText());
+					double y = Double.parseDouble(yInput.getText());
+					double radius = Double.parseDouble(radiusInput.getText());
 
-					addSphere(x,y,radius);
+					if(x > 0 && y > 0 && radius > 0) {
+						addSphere(x,y,radius,1);
+						messageLabel.setText("Shape added.");
+					}
+					else {
+						messageLabel.setText("Shape cannot be added no negative values input.");
+					}
+
 				});
 			}
 			else if(chosenShape.equals("Cylinder")) {
@@ -189,12 +238,20 @@ public class Driver extends Application{
 				gp.addColumn(3, radiusInput, heightInput);
 
 				addShape.setOnAction(event ->{
-					int x = Integer.parseInt(xInput.getText());
-					int y = Integer.parseInt(yInput.getText());
-					int radius = Integer.parseInt(radiusInput.getText());
-					int height = Integer.parseInt(heightInput.getText());
 
-					addCylinder(x,y,radius,height);
+					double x = Double.parseDouble(xInput.getText());
+					double y = Double.parseDouble(yInput.getText());
+					double radius = Double.parseDouble(radiusInput.getText());
+					double height = Double.parseDouble(heightInput.getText());
+
+					if(x > 0 && y > 0 && radius > 0 && height > 0) {
+						addCylinder(x,y,radius,height,1);
+						messageLabel.setText("Shape added.");
+					}
+					else {
+						messageLabel.setText("Shape cannot be added no negative values input.");
+					}
+
 				});
 			}
 			else if(chosenShape.equals("Box")) {
@@ -203,13 +260,19 @@ public class Driver extends Application{
 				gp.addColumn(3, widthInput, heightInput, lengthInput);
 
 				addShape.setOnAction(event ->{
-					int x = Integer.parseInt(xInput.getText());
-					int y = Integer.parseInt(yInput.getText());
-					int width = Integer.parseInt(widthInput.getText());
-					int height = Integer.parseInt(heightInput.getText());
-					int depth = Integer.parseInt(lengthInput.getText());
+					double x = Double.parseDouble(xInput.getText());
+					double y = Double.parseDouble(yInput.getText());
+					double width = Double.parseDouble(widthInput.getText());
+					double height = Double.parseDouble(heightInput.getText());
+					double depth = Double.parseDouble(lengthInput.getText());
 
-					addBox(x,y,width,height,depth);
+					if(x > 0 && y > 0 && width > 0 && height > 0 && depth > 0) {
+						addBox(x,y,width,height,depth,1);
+						messageLabel.setText("Shape added.");
+					}
+					else {
+						messageLabel.setText("Shape cannot be added no negative values input.");
+					}
 				});
 
 			}
@@ -217,42 +280,68 @@ public class Driver extends Application{
 		});
 	}
 
-	private void addSphere(int x, int y, int radius) {
+	private void addSphere(double x, double y, double radius, double s) {
 		Sphere sphere = new Sphere(radius);
 		sphere.getTransforms().add(new Translate(x, y, 0));
+		sphere.setScaleX(s);
+		sphere.setScaleY(s);
+		sphere.setScaleZ(s);
+
 
 		sphere.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
 			selectedShape = sphere;
+			shapeSelected.setText("Sphere");
+			xPos.setValue(selectedShape.getTranslateX());
+			yPos.setValue(selectedShape.getTranslateY());
+			scale.setValue(selectedShape.getScaleX());
 		});
-		
-		sphere.boundsInParentProperty();
+
+		sphere.layoutXProperty();
+		sphere.layoutYProperty();
 
 		shapesGroup.getChildren().add(sphere);
 	}
 
-	private void addCylinder(int x, int y, int radius, int height) {
+	private void addCylinder(double x, double y, double radius, double height, double s) {
 		Cylinder cylinder = new Cylinder(radius, height);
 		cylinder.getTransforms().add(new Translate(x, y, 0));
+		cylinder.setScaleX(s);
+		cylinder.setScaleY(s);
+		cylinder.setScaleZ(s);
 
 		cylinder.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
 			selectedShape = cylinder;
+			shapeSelected.setText("Cylinder");
+			xPos.setValue(selectedShape.getTranslateX());
+			yPos.setValue(selectedShape.getTranslateY());
+			scale.setValue(selectedShape.getScaleX());
 		});
-		
-		cylinder.boundsInParentProperty();
+
+		cylinder.layoutXProperty();
+		cylinder.layoutYProperty();
 
 		shapesGroup.getChildren().add(cylinder);
 	}
 
-	private void addBox(int x, int y, int width, int height, int depth) {
+	private void addBox(double x, double y, double width, double height, double depth, double s) {
 		Box box = new Box(width,height,depth);
 		box.getTransforms().add(new Translate(x, y, 0));
+		box.setScaleX(s);
+		box.setScaleY(s);
+		box.setScaleZ(s);
 
 		box.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
 			selectedShape = box;
+			shapeSelected.setText("Box");
+			xPos.setValue(selectedShape.getTranslateX());
+			yPos.setValue(selectedShape.getTranslateY());
+			scale.setValue(selectedShape.getScaleX());
+
 		});
 
-		box.boundsInParentProperty();
-		
+		box.layoutXProperty();
+		box.layoutYProperty();
+
 		shapesGroup.getChildren().add(box);
 	}
 
@@ -265,42 +354,31 @@ public class Driver extends Application{
 		Label scaleLabel = new Label("Scale");
 
 		//Horizontal and Vertical Slider
-		Slider xAxis = new Slider(-360.0, 360.0, 0.0);
 		xAxis.setShowTickMarks(true);
 		xAxis.setShowTickLabels(true);
-		Slider yAxis = new Slider(-360.0, 360.0, 0.0);
 		yAxis.setShowTickMarks(true);
 		yAxis.setShowTickLabels(true);
 
 		//X and Y position slider
-		Slider xPos = new Slider(-500.0, 500.0, 0);
 		xPos.setShowTickMarks(true);
 		xPos.setShowTickLabels(true);
-		Slider yPos = new Slider(-500.0, 500.0, 0);
 		yPos.setShowTickMarks(true);
 		yPos.setShowTickLabels(true);
 
 		//Scale slider
-		Slider scale = new Slider(1.0, 5.0, 0);
 		scale.setShowTickMarks(true);
 		scale.setShowTickLabels(true);
 
 		GridPane gp = new GridPane();
 
-
 		gp.addColumn(0, hRotateLabel, vRotateLabel, xLabel, yLabel, scaleLabel);
 		gp.addColumn(1, xAxis, yAxis, xPos, yPos, scale);
 		gp.setHgap(10);
 		gp.setVgap(10);
-		
-		xAxis.setValue(0);
-		yAxis.setValue(0);
-		xPos.setValue(0);
-		yPos.setValue(0);
-		scale.setValue(0);
 
 		xAxis.valueProperty().addListener((o, oldVal, newVal) ->
 		{        	
+
 			if(selectedShape != null)
 			{
 				Rotate xRotate = new Rotate(0, Rotate.X_AXIS);
@@ -325,16 +403,18 @@ public class Driver extends Application{
 		{
 			if(selectedShape != null)
 			{
-				selectedShape.setLayoutX((double)newVal);
+				if((double)newVal <= shapesSub.getWidth() - 50 && (double)newVal >= -150)
+					selectedShape.setTranslateX((double)newVal);
 			}
 
 		});
-		
+
 		yPos.valueProperty().addListener((o, oldVal, newVal) ->
 		{
 			if(selectedShape != null)
 			{
-				selectedShape.setLayoutY((double)newVal);
+				if((double)newVal <= shapesSub.getWidth() - 50 && (double)newVal >= -150)
+					selectedShape.setTranslateY((double)newVal);
 			}
 
 		});
@@ -347,14 +427,6 @@ public class Driver extends Application{
 				selectedShape.setScaleZ((double)newVal);
 			}
 		});
-		
-		shapeSelected.textProperty().addListener((observer, oldValue, newValue) ->{
-			
-			if(selectedShape != null) {
-				
-				shapeSelected.setText("Selected Shape");
-			}
-		});
 
 		VBox customizationMenu = new VBox(10,shapeSelected,gp);
 		customizationMenu.setPadding(new Insets(10));
@@ -364,11 +436,82 @@ public class Driver extends Application{
 
 	}
 
-	private void writeFile(String fileName) {
-
+	private String writeSphere(Sphere shape) {
+		return "Sphere," + (shape.getTransforms().get(0).getTx() + shape.getTranslateX()) + "," + (shape.getTransforms().get(0).getTy() + shape.getTranslateY()) + "," + shape.getRadius() + "," + shape.getScaleX(); 
+	}
+	private String writeCylinder(Cylinder shape) {
+		return "Cylinder," + (shape.getTransforms().get(0).getTx() + shape.getTranslateX()) + "," + (shape.getTransforms().get(0).getTy() + shape.getTranslateY()) + "," + shape.getRadius() + "," + 0 + "," + shape.getHeight() + "," + shape.getScaleX(); 	
+	}
+	private String writeBox(Box shape) {
+		return "Box," + (shape.getTransforms().get(0).getTx() + shape.getTranslateX()) + "," + (shape.getTransforms().get(0).getTy() + shape.getTranslateY()) + "," + 0 + "," + shape.getWidth() + "," + shape.getHeight() + "," + shape.getDepth() + "," + shape.getScaleX(); 		
 	}
 
-	private void openFile(String fileName) {
+	private void writeFile(String fileName) throws IOException {
+		CSV csvWriter = new CSV(fileName);
 
+		for(Node x : shapesGroup.getChildren()) {
+
+			if(x instanceof Sphere)
+				csvWriter.write(writeSphere((Sphere) x));
+
+			if(x instanceof Cylinder)
+				csvWriter.write(writeCylinder((Cylinder)x));
+
+			if(x instanceof Box)
+				csvWriter.write(writeBox((Box)x));	
+		}
+	}
+
+	private void getFileContent(String filePath) throws IOException {
+		try
+		(BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+			StringBuilder sb = new StringBuilder();
+			String line = br.readLine();
+
+			while (line != null) {
+				if(!line.isEmpty()) {
+					String everything = line;
+
+					String[] tokens = everything.split(",");
+
+					if(tokens[0].equals("Sphere")) {
+						double x = Double.parseDouble(tokens[1]);
+						double y = Double.parseDouble(tokens[2]);
+						double radius = Double.parseDouble(tokens[3]);
+						double scale = Double.parseDouble(tokens[4]);
+
+						addSphere(x,y,radius,scale);
+					}
+
+					if(tokens[0].equals("Cylinder")) {
+						double x = Double.parseDouble(tokens[1]);
+						double y = Double.parseDouble(tokens[2]);
+						double radius = Double.parseDouble(tokens[3]);
+						double height = Double.parseDouble(tokens[5]);
+						double scale = Double.parseDouble(tokens[4]);
+
+						addCylinder(x,y,radius, height, scale);	
+					}
+
+					if(tokens[0].equals("Box")) {
+						double x = Double.parseDouble(tokens[1]);
+						double y = Double.parseDouble(tokens[2]);
+						double width = Double.parseDouble(tokens[4]);
+						double height = Double.parseDouble(tokens[5]);
+						double depth = Double.parseDouble(tokens[6]);
+						double scale = Double.parseDouble(tokens[4]);
+
+						addBox(x,y,width,height,depth, scale);
+					}
+				}
+				
+				line = br.readLine();
+
+			}
+
+		}
+		catch(FileNotFoundException e) {
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		}
 	}
 }

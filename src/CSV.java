@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class CSV {
 	
-	private static final String HEADER = "Shape, X, Y, Radius, Width, Height, Depth";
+	//private static final String HEADER = "Shape, X, Y, Radius, Width, Height, Depth, Scale";
 
 	private String outputFile;
 	
@@ -14,9 +14,7 @@ public class CSV {
 		
 		FileWriter fstream = new FileWriter(outputFile);
 		BufferedWriter ostream = new BufferedWriter(fstream);
-		
-		ostream.write(HEADER);
-		
+				
 		ostream.close();	
 	}
 	
