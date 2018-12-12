@@ -305,10 +305,11 @@ public class Driver extends Application{
 	private void addCylinder(double x, double y, double radius, double height, double s) {
 		Cylinder cylinder = new Cylinder(radius, height);
 		cylinder.getTransforms().add(new Translate(x, y, 0));
+		
 		cylinder.setScaleX(s);
 		cylinder.setScaleY(s);
 		cylinder.setScaleZ(s);
-
+		
 		cylinder.addEventFilter(MouseEvent.MOUSE_CLICKED, clickEvent ->{
 			selectedShape = cylinder;
 			shapeSelected.setText("Cylinder");
